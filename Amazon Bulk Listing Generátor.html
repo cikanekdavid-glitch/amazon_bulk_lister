@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)file:///D:/Sta%C5%BEen%C3%A9/amazon_listing_generator%20(3).html -->
+<html lang="cs"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon Bulk Listing Generátor</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #1a1a1a; background: #f5f5f4; min-height: 100vh; }
+  .header { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 16px 32px; display: flex; align-items: center; gap: 12px; }
+  .header h1 { font-size: 16px; font-weight: 600; }
+  .header .badge { background: #f0fdf4; color: #15803d; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid #bbf7d0; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+  .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 20px 24px; margin-bottom: 16px; }
+  .card-title { font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
+  .api-row { display: flex; gap: 10px; align-items: center; }
+  .api-row input { flex: 1; font-family: monospace; font-size: 13px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 7px; color: #1a1a1a; background: #fafafa; }
+  .api-row input:focus { outline: none; border-color: #6366f1; background: #fff; }
+  .api-status { font-size: 12px; color: #9ca3af; white-space: nowrap; }
+  .api-status.ok { color: #16a34a; }
+  .tabs { display: flex; gap: 0; border: 1px solid #e5e5e5; border-radius: 7px; overflow: hidden; margin-bottom: 14px; width: fit-content; }
+  .tab { padding: 7px 18px; font-size: 13px; cursor: pointer; background: none; border: none; color: #6b7280; font-family: inherit; }
+  .tab.active { background: #f3f4f6; color: #111; font-weight: 500; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+  .col-lbl { font-size: 12px; color: #6b7280; margin-bottom: 5px; font-weight: 500; }
+  textarea, input[type=text] { width: 100%; font-family: 'Courier New', monospace; font-size: 13px; color: #1a1a1a; background: #fafafa; border: 1px solid #d1d5db; border-radius: 7px; padding: 10px 12px; resize: vertical; line-height: 1.5; }
+  textarea:focus, input[type=text]:focus { outline: none; border-color: #6366f1; background: #fff; }
+  input[type=text] { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; resize: none; }
+  .hint { font-size: 12px; color: #9ca3af; margin-bottom: 8px; line-height: 1.5; }
+  .hint code { background: #f3f4f6; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+  .btn { padding: 8px 18px; font-size: 13px; font-family: inherit; border-radius: 7px; cursor: pointer; border: 1px solid #d1d5db; background: #fff; color: #374151; font-weight: 500; transition: background 0.1s; }
+  .btn:hover { background: #f9fafb; }
+  .btn-primary { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .btn-primary:hover { background: #4338ca; border-color: #4338ca; }
+  .btn-primary:disabled { background: #a5b4fc; border-color: #a5b4fc; cursor: not-allowed; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .preview-bar { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 7px; padding: 8px 14px; font-size: 13px; color: #0369a1; margin-bottom: 14px; display: none; }
+  .progress-wrap { margin-bottom: 16px; display: none; }
+  .prog-info { display: flex; justify-content: space-between; font-size: 13px; color: #6b7280; margin-bottom: 6px; }
+  .prog-bar { height: 5px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+  .prog-fill { height: 100%; background: #4f46e5; border-radius: 3px; transition: width 0.3s; }
+  .result-wrap { overflow-x: auto; }
+  table.rt { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
+  table.rt th { text-align: left; padding: 9px 12px; font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; background: #f9fafb; border-bottom: 1px solid #e5e5e5; white-space: nowrap; }
+  table.rt td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: top; line-height: 1.5; }
+  table.rt tr:last-child td { border-bottom: none; }
+  table.rt tr:hover td { background: #fafafa; }
+  td.col-orig { color: #6b7280; font-size: 12px; min-width: 130px; max-width: 180px; }
+  td.col-title { min-width: 200px; max-width: 280px; font-weight: 500; color: #111; }
+  td.col-bullets { min-width: 360px; }
+  .bp { font-size: 12px; color: #374151; padding: 2px 0; line-height: 1.6; }
+  .bp .kw { font-weight: 600; color: #111; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+  .b-ok { background: #f0fdf4; color: #15803d; }
+  .b-wait { background: #f3f4f6; color: #9ca3af; }
+  .b-err { background: #fef2f2; color: #dc2626; }
+  .b-proc { background: #fffbeb; color: #d97706; }
+  .export-row { display: flex; gap: 10px; align-items: center; padding-top: 16px; border-top: 1px solid #f3f4f6; flex-wrap: wrap; }
+  .export-info { font-size: 13px; color: #6b7280; margin-left: auto; }
+  .err-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 7px; padding: 10px 14px; font-size: 13px; color: #dc2626; margin-bottom: 12px; display: none; }
+  .batch-size-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .batch-size-row label { font-size: 13px; color: #6b7280; }
+  .batch-size-row select { padding: 5px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; font-family: inherit; background: #fff; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Amazon Bulk Listing Generátor</h1>
+  <span class="badge">CZ → EN</span>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">API klíč</div>
+    <div class="api-row">
+      <input type="password" id="api-key" placeholder="sk-ant-api03-..." oninput="checkKey()">
+      <span class="api-status ok" id="key-status">Klíč vypadá správně</span>
+    </div>
+    <p class="hint" style="margin-top:8px;">Klíč zůstává pouze v prohlížeči, nikam se neodesílá. Najdeš ho na <strong>console.anthropic.com</strong> → API Keys.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Data SKU</div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(&#39;paste&#39;)">Paste z Excelu</button>
+      <button class="tab" onclick="switchTab(&#39;manual&#39;)">Ručně (název | popis)</button>
+    </div>
+
+    <div id="panel-paste" class="panel active">
+      <p class="hint">Zkopíruj <strong>sloupec A</strong> (názvy) a <strong>sloupec B</strong> (popisy) z Excelu — každý zvlášť do příslušného pole. Nebo označ oba sloupce najednou a vlož do spodního pole (tab-oddělené).</p>
+      <div class="two-col">
+        <div>
+          <div class="col-lbl">Sloupec A — Názvy (CZ)</div>
+          <textarea id="col-names" rows="12" placeholder="Nerezová pánev 28cm
+Silikonová stěrka
+Kuchyňský nůž 20cm
+..."></textarea>
+        </div>
+        <div>
+          <div class="col-lbl">Sloupec B — Popisy (CZ)</div>
+          <textarea id="col-descs" rows="12" placeholder="Nepřilnavý povrch, vhodná pro indukci
+Odolná do 230°C, bez BPA
+Ocel X50CrMoV15, ergonomická rukojeť
+..."></textarea>
+        </div>
+      </div>
+      <p class="hint">Nebo vlož oba sloupce najednou (Ctrl+C v Excelu → Ctrl+V sem):</p>
+      <textarea id="paste-both" rows="4" placeholder="Nerezová pánev 28cm	Nepřilnavý povrch, vhodná pro indukci
+Silikonová stěrka	Odolná do 230°C, bez BPA" oninput="parsePaste(this.value)"></textarea>
+    </div>
+
+    <div id="panel-manual" class="panel">
+      <p class="hint">Každý řádek = 1 SKU. Formát: <code>název | popis</code>. Popis je volitelný.</p>
+      <textarea id="manual-input" rows="14" placeholder="Nerezová pánev 28cm | Nepřilnavý povrch, vhodná pro indukci
+Silikonová stěrka | Odolná do 230°C, bez BPA
+Kuchyňský nůž 20cm"></textarea>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="col-lbl" style="margin-bottom:5px;">Kategorie / kontext (volitelné)</div>
+      <input type="text" id="category" placeholder="např. kuchyňské náčiní, sportovní doplňky, kosmetika..." style="font-family:inherit;">
+    </div>
+
+    <div class="batch-size-row" style="margin-top:12px;">
+      <label>Velikost dávky:</label>
+      <select id="batch-size">
+        <option value="3">3 SKU / volání (pomalejší, spolehlivější)</option>
+        <option value="5" selected="">5 SKU / volání (doporučeno)</option>
+        <option value="8">8 SKU / volání (rychlejší)</option>
+      </select>
+    </div>
+
+    <div id="preview-bar" class="preview-bar"></div>
+
+    <div class="controls">
+      <button class="btn" onclick="previewSkus()">Náhled SKU</button>
+      <button class="btn btn-primary" id="gen-btn" onclick="startGenerate()">Generovat listingy</button>
+      <span id="gen-info" style="font-size:13px;color:#9ca3af;"></span>
+    </div>
+  </div>
+
+  <div id="err-box" class="err-box" style="display: none;"></div>
+
+  <div id="progress-wrap" class="progress-wrap" style="display: block;">
+    <div class="prog-info"><span id="prog-label">Hotovo!</span><span id="prog-pct">100 %</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width: 100%;"></div></div>
+  </div>
+
+  <div id="results-card" style="display: block;" class="card">
+    <div class="card-title">Výsledky</div>
+    <div class="result-wrap">
+      <table class="rt" id="result-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Původní název (CZ)</th>
+            <th>Stav</th>
+            <th>Amazon název (EN)</th>
+            <th>Bullet points</th>
+          </tr>
+        </thead>
+        <tbody id="result-body"><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">1</td>
+      <td class="col-orig">Sluneční brýle Crullé Lit C3</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-0">ok</span></td>
+      <td class="col-title">Crullé Lit Sunglasses C3 UV Protection Designer Eyewear Fashion Frames</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">UV PROTECTION:</span> Premium lenses block 100% harmful UVA and UVB rays, protecting your eyes from sun damage during outdoor activities and daily wear.</div><div class="bp"><span class="kw">DESIGNER FRAMES:</span> Stylish C3 color variant with contemporary design that complements any outfit, perfect for fashion-conscious individuals.</div><div class="bp"><span class="kw">COMFORT FIT:</span> Lightweight construction with ergonomic nose pads and temple design ensures all-day comfortable wear without slipping or pressure.</div><div class="bp"><span class="kw">DURABLE QUALITY:</span> High-quality materials and precision craftsmanship provide long-lasting durability and resistance to everyday wear and tear.</div><div class="bp"><span class="kw">VERSATILE STYLE:</span> Classic yet modern design suitable for various occasions from casual outings to professional settings, enhancing your personal style.</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">2</td>
+      <td class="col-orig">Sluneční brýle Crullé Lit C2</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-1">ok</span></td>
+      <td class="col-title">Crullé Lit Sunglasses C2 UV Protection Designer Eyewear Fashion Frames</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">UV PROTECTION:</span> Premium lenses block 100% harmful UVA and UVB rays, protecting your eyes from sun damage during outdoor activities and daily wear.</div><div class="bp"><span class="kw">DESIGNER FRAMES:</span> Stylish C2 color variant with contemporary design that complements any outfit, perfect for fashion-conscious individuals.</div><div class="bp"><span class="kw">COMFORT FIT:</span> Lightweight construction with ergonomic nose pads and temple design ensures all-day comfortable wear without slipping or pressure.</div><div class="bp"><span class="kw">DURABLE QUALITY:</span> High-quality materials and precision craftsmanship provide long-lasting durability and resistance to everyday wear and tear.</div><div class="bp"><span class="kw">VERSATILE STYLE:</span> Classic yet modern design suitable for various occasions from casual outings to professional settings, enhancing your personal style.</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">3</td>
+      <td class="col-orig">Sluneční brýle Crullé Lit C1</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-2">ok</span></td>
+      <td class="col-title">Crullé Lit Sunglasses C1 UV Protection Designer Eyewear Fashion Frames</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">UV PROTECTION:</span> Premium lenses block 100% harmful UVA and UVB rays, protecting your eyes from sun damage during outdoor activities and daily wear.</div><div class="bp"><span class="kw">DESIGNER FRAMES:</span> Stylish C1 color variant with contemporary design that complements any outfit, perfect for fashion-conscious individuals.</div><div class="bp"><span class="kw">COMFORT FIT:</span> Lightweight construction with ergonomic nose pads and temple design ensures all-day comfortable wear without slipping or pressure.</div><div class="bp"><span class="kw">DURABLE QUALITY:</span> High-quality materials and precision craftsmanship provide long-lasting durability and resistance to everyday wear and tear.</div><div class="bp"><span class="kw">VERSATILE STYLE:</span> Classic yet modern design suitable for various occasions from casual outings to professional settings, enhancing your personal style.</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">4</td>
+      <td class="col-orig">Sluneční brýle Crullé Hype C2</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-3">ok</span></td>
+      <td class="col-title">Crullé Hype Sunglasses C2 UV Protection Designer Eyewear Fashion Frames</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">UV PROTECTION:</span> Premium lenses block 100% harmful UVA and UVB rays, protecting your eyes from sun damage during outdoor activities and daily wear.</div><div class="bp"><span class="kw">TRENDY DESIGN:</span> Bold Hype C2 style with modern aesthetic that makes a fashion statement while providing superior eye protection and comfort.</div><div class="bp"><span class="kw">COMFORT FIT:</span> Lightweight construction with ergonomic nose pads and temple design ensures all-day comfortable wear without slipping or pressure.</div><div class="bp"><span class="kw">DURABLE QUALITY:</span> High-quality materials and precision craftsmanship provide long-lasting durability and resistance to everyday wear and tear.</div><div class="bp"><span class="kw">FASHION FORWARD:</span> Contemporary Hype collection design perfect for trendsetters who want to combine style with functional eye protection.</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">5</td>
+      <td class="col-orig">Sluneční brýle Crullé Hype C1</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-4">ok</span></td>
+      <td class="col-title">Crullé Hype Sunglasses C1 UV Protection Designer Eyewear Fashion Frames</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">UV PROTECTION:</span> Premium lenses block 100% harmful UVA and UVB rays, protecting your eyes from sun damage during outdoor activities and daily wear.</div><div class="bp"><span class="kw">TRENDY DESIGN:</span> Bold Hype C1 style with modern aesthetic that makes a fashion statement while providing superior eye protection and comfort.</div><div class="bp"><span class="kw">COMFORT FIT:</span> Lightweight construction with ergonomic nose pads and temple design ensures all-day comfortable wear without slipping or pressure.</div><div class="bp"><span class="kw">DURABLE QUALITY:</span> High-quality materials and precision craftsmanship provide long-lasting durability and resistance to everyday wear and tear.</div><div class="bp"><span class="kw">FASHION FORWARD:</span> Contemporary Hype collection design perfect for trendsetters who want to combine style with functional eye protection.</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">6</td>
+      <td class="col-orig">Sluneční brýle Crullé Vibe C1</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-5">ok</span></td>
+      <td class="col-title">Crullé Vibe C1 Sunglasses UV Protection Polarized Lenses Fashion Eyewear for Men Women</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">UV PROTECTION:</span> 100% UV400 protection shields your eyes from harmful UVA and UVB rays during outdoor activities and daily wear</div><div class="bp"><span class="kw">POLARIZED LENSES:</span> Anti-glare polarized lenses reduce eye strain and enhance visual clarity for driving, sports, and outdoor adventures</div><div class="bp"><span class="kw">LIGHTWEIGHT FRAME:</span> Durable yet comfortable frame construction ensures all-day wearability without pressure points or discomfort</div><div class="bp"><span class="kw">STYLISH DESIGN:</span> Modern Vibe frame style complements various face shapes and outfits for versatile fashion appeal</div><div class="bp"><span class="kw">SCRATCH RESISTANT:</span> High-quality lens coating resists scratches and maintains crystal clear vision with proper care and maintenance</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">7</td>
+      <td class="col-orig">Sluneční brýle Crullé Litty C3</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-6">ok</span></td>
+      <td class="col-title">Crullé Litty C3 Sunglasses UV Protection Fashion Eyewear Lightweight Frame for Men Women</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">UV PROTECTION:</span> Advanced UV400 coating blocks 100% of harmful ultraviolet rays to protect your eyes and surrounding delicate skin areas</div><div class="bp"><span class="kw">PREMIUM LENSES:</span> High-quality optical lenses provide crystal clear vision with reduced glare for enhanced visual comfort outdoors</div><div class="bp"><span class="kw">ERGONOMIC FIT:</span> Carefully designed frame contours follow natural face curves for secure, comfortable wear during extended use periods</div><div class="bp"><span class="kw">FASHION FORWARD:</span> Contemporary Litty C3 styling adds sophisticated elegance to any outfit for work, leisure, or special occasions</div><div class="bp"><span class="kw">DURABLE BUILD:</span> Robust construction withstands daily wear while maintaining structural integrity and optical performance over time</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">8</td>
+      <td class="col-orig">Sluneční brýle Crullé Litty C2</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-7">ok</span></td>
+      <td class="col-title">Crullé Litty C2 Sunglasses UV Protection Anti-Glare Lenses Comfortable Frame for Men Women</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">UV SHIELD:</span> Complete UV400 protection safeguards eyes from dangerous sun exposure while maintaining natural color perception outdoors</div><div class="bp"><span class="kw">ANTI-GLARE:</span> Specialized lens treatment minimizes harsh reflections from water, snow, and pavement for safer driving and sports</div><div class="bp"><span class="kw">COMFORT FIT:</span> Adjustable nose pads and temple tips provide personalized comfort that stays secure during movement and activities</div><div class="bp"><span class="kw">VERSATILE STYLE:</span> Timeless Litty C2 design seamlessly transitions from casual weekend wear to professional business environments</div><div class="bp"><span class="kw">IMPACT RESISTANT:</span> Reinforced lens and frame materials offer superior durability against drops, impacts, and everyday handling stress</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">9</td>
+      <td class="col-orig">Sluneční brýle Crullé Litty C1</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-8">ok</span></td>
+      <td class="col-title">Crullé Litty C1 Sunglasses UV Protection Polarized Anti-Glare Lenses Fashion Eyewear Unisex</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">POLARIZED VISION:</span> Advanced polarization technology eliminates glare from reflective surfaces for clearer, more comfortable outdoor vision</div><div class="bp"><span class="kw">UV DEFENSE:</span> Military-grade UV400 protection blocks harmful solar radiation to prevent eye damage and premature aging around eyes</div><div class="bp"><span class="kw">LIGHTWEIGHT WEAR:</span> Featherweight construction reduces facial pressure while maintaining structural strength for long-lasting durability</div><div class="bp"><span class="kw">CLASSIC APPEAL:</span> Sophisticated Litty C1 frame design enhances facial features and complements both casual and formal attire choices</div><div class="bp"><span class="kw">OPTICAL CLARITY:</span> Distortion-free lenses maintain true color representation and sharp focus across entire field of view range</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">10</td>
+      <td class="col-orig">Sluneční brýle Crullé Rad C2</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-9">ok</span></td>
+      <td class="col-title">Crullé Rad C2 Sunglasses UV Protection Sports Eyewear Durable Frame for Men Women Outdoor</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">SPORTS READY:</span> Engineered for active lifestyles with secure grip technology that prevents slipping during intense physical activities</div><div class="bp"><span class="kw">MAXIMUM UV:</span> Superior UV400 lens protection blocks 100% harmful rays while enhancing contrast for improved outdoor performance clarity</div><div class="bp"><span class="kw">WRAPAROUND FIT:</span> Curved frame design provides extended peripheral coverage and wind protection for cycling, running, and water sports</div><div class="bp"><span class="kw">SHATTERPROOF:</span> Impact-resistant polycarbonate lenses meet safety standards for high-energy activities and demanding outdoor conditions</div><div class="bp"><span class="kw">QUICK ADJUST:</span> Flexible temple arms and rubber grip zones allow fast, comfortable fitting adjustments for various head sizes and shapes</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">11</td>
+      <td class="col-orig">Sluneční brýle Crullé Rad C1</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-10">ok</span></td>
+      <td class="col-title">Crullé Rad Sunglasses C1 UV Protection Fashion Eyewear Unisex Classic Style</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">UV PROTECTION:</span> Advanced UV400 lenses block 100% of harmful UVA and UVB rays, protecting your eyes from sun damage during outdoor activities.</div><div class="bp"><span class="kw">PREMIUM FRAME:</span> Durable lightweight construction with comfortable fit for all-day wear, featuring high-quality materials resistant to daily use.</div><div class="bp"><span class="kw">CLASSIC STYLE:</span> Timeless Rad design complements any outfit, perfect for casual wear, driving, sports, and outdoor adventures.</div><div class="bp"><span class="kw">CLEAR VISION:</span> Anti-glare lenses reduce eye strain and provide crystal clear vision in bright sunlight conditions.</div><div class="bp"><span class="kw">UNISEX DESIGN:</span> Versatile C1 color variant suits both men and women, making it an ideal accessory for any wardrobe.</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">12</td>
+      <td class="col-orig">Sluneční brýle Crullé Swag C2</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-11">ok</span></td>
+      <td class="col-title">Crullé Swag Sunglasses C2 UV Protection Polarized Lenses Fashion Eyewear Unisex</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">POLARIZED LENSES:</span> Advanced polarization technology reduces glare from water, snow, and pavement surfaces for enhanced visual comfort.</div><div class="bp"><span class="kw">UV400 SHIELD:</span> Complete protection against harmful UVA and UVB radiation, safeguarding your eyes from long-term sun damage.</div><div class="bp"><span class="kw">SWAG DESIGN:</span> Contemporary trendy frame style that elevates your look while providing superior eye protection and comfort.</div><div class="bp"><span class="kw">LIGHTWEIGHT COMFORT:</span> Ergonomic frame construction ensures comfortable all-day wear without pressure points or sliding.</div><div class="bp"><span class="kw">C2 VARIANT:</span> Stylish color combination suitable for both men and women, perfect for fashion-conscious individuals.</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">13</td>
+      <td class="col-orig">Sluneční brýle Crullé Swag C1</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-12">ok</span></td>
+      <td class="col-title">Crullé Swag Sunglasses C1 Polarized UV Protection Fashion Eyewear Classic Design</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">ANTI-GLARE:</span> Polarized lenses eliminate reflective glare from surfaces, providing clearer vision during driving and outdoor sports.</div><div class="bp"><span class="kw">UV PROTECTION:</span> 100% UV400 filtering blocks all harmful ultraviolet rays, preventing eye strain and long-term damage.</div><div class="bp"><span class="kw">SWAG STYLE:</span> Modern fashion-forward frame design that combines style with functionality for the trendy individual.</div><div class="bp"><span class="kw">DURABLE BUILD:</span> High-quality materials ensure long-lasting wear and resistance to scratches, impacts, and daily use.</div><div class="bp"><span class="kw">C1 COLORWAY:</span> Classic color scheme works with any outfit, suitable for both casual and semi-formal occasions.</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">14</td>
+      <td class="col-orig">Sluneční brýle Crullé Awesome C1</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-13">ok</span></td>
+      <td class="col-title">Crullé Awesome Sunglasses C1 UV Protection Anti-Glare Lenses Fashion Eyewear</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">AWESOME DESIGN:</span> Bold contemporary frame style makes a fashion statement while delivering superior eye protection and comfort.</div><div class="bp"><span class="kw">UV400 DEFENSE:</span> Complete ultraviolet protection shields your eyes from harmful sun rays during outdoor activities and sports.</div><div class="bp"><span class="kw">ANTI-REFLECTION:</span> Specialized lens coating reduces glare and reflections, improving visual clarity in bright conditions.</div><div class="bp"><span class="kw">ERGONOMIC FIT:</span> Carefully designed frame contours provide secure comfortable fit that stays in place during active use.</div><div class="bp"><span class="kw">C1 FINISH:</span> Premium color treatment offers sophisticated look suitable for both casual wear and special occasions.</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">15</td>
+      <td class="col-orig">Sluneční brýle Crullé Boss Lady C1</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-14">ok</span></td>
+      <td class="col-title">Crullé Boss Lady Sunglasses C1 Women's UV Protection Fashion Eyewear Premium Style</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">BOSS LADY:</span> Empowering feminine design crafted specifically for confident women who demand both style and superior protection.</div><div class="bp"><span class="kw">UV SHIELD:</span> Advanced UV400 technology blocks 100% of harmful rays, protecting delicate eye area from premature aging.</div><div class="bp"><span class="kw">PREMIUM QUALITY:</span> High-end materials and construction ensure durability and long-lasting performance with elegant appearance.</div><div class="bp"><span class="kw">COMFORTABLE WEAR:</span> Lightweight frame with optimized fit prevents slipping and pressure points during extended use.</div><div class="bp"><span class="kw">C1 ELEGANCE:</span> Sophisticated color palette complements professional and casual outfits, perfect for the modern woman.</div></td>
+    </tr><tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">16</td>
+      <td class="col-orig">Sluneční brýle Crullé Sweetheart C4</td>
+      <td style="white-space:nowrap;"><span class="badge b-ok" id="st-15">ok</span></td>
+      <td class="col-title">Crullé Sweetheart Sunglasses C4 Women's Fashion Eyewear UV Protection Lightweight Frame</td>
+      <td class="col-bullets"><div class="bp"><span class="kw">UV PROTECTION:</span> 100% UV400 protection shields your eyes from harmful UVA and UVB rays during outdoor activities and daily wear</div><div class="bp"><span class="kw">LIGHTWEIGHT FRAME:</span> Comfortable acetate construction provides all-day wearability without pressure points or sliding</div><div class="bp"><span class="kw">FASHION DESIGN:</span> Sweetheart style complements face shapes with elegant curves and contemporary aesthetic appeal</div><div class="bp"><span class="kw">DURABLE LENSES:</span> High-quality optical lenses resist scratches and provide clear vision with reduced glare</div><div class="bp"><span class="kw">VERSATILE STYLE:</span> Perfect for casual outings, beach trips, driving, and everyday fashion coordination</div></td>
+    </tr></tbody>
+      </table>
+    </div>
+    <div class="export-row" id="export-row" style="display: flex;">
+      <button class="btn btn-sm" onclick="exportCSV()">Stáhnout CSV</button>
+      <button class="btn btn-sm" onclick="exportTSV()">Stáhnout TSV (Excel)</button>
+      <span class="export-info" id="export-info">16 / 16 SKU hotovo</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let allSkus = [];
+let results = [];
+let isRunning = false;
+
+function checkKey() {
+  const k = document.getElementById('api-key').value.trim();
+  const st = document.getElementById('key-status');
+  if (k.startsWith('sk-ant-') && k.length > 20) {
+    st.textContent = 'Klíč vypadá správně';
+    st.className = 'api-status ok';
+  } else if (k.length > 0) {
+    st.textContent = 'Klíč by měl začínat sk-ant-...';
+    st.className = 'api-status';
+  } else {
+    st.textContent = 'Zadej Anthropic API klíč';
+    st.className = 'api-status';
+  }
+}
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && t === 'paste') || (i === 1 && t === 'manual')));
+  document.getElementById('panel-paste').classList.toggle('active', t === 'paste');
+  document.getElementById('panel-manual').classList.toggle('active', t === 'manual');
+}
+
+function parsePaste(val) {
+  if (!val.trim()) return;
+  const rows = val.trim().split('\n');
+  const names = [], descs = [];
+  rows.forEach(r => {
+    const parts = r.split('\t');
+    names.push((parts[0] || '').trim());
+    descs.push((parts[1] || '').trim());
+  });
+  document.getElementById('col-names').value = names.join('\n');
+  document.getElementById('col-descs').value = descs.join('\n');
+}
+
+function getSkus() {
+  const isPaste = document.getElementById('panel-paste').classList.contains('active');
+  let skus = [];
+  if (isPaste) {
+    const names = document.getElementById('col-names').value.trim().split('\n').map(s => s.trim()).filter(Boolean);
+    const descs = document.getElementById('col-descs').value.trim().split('\n').map(s => s.trim());
+    skus = names.map((n, i) => ({ name: n, desc: descs[i] || '' }));
+  } else {
+    const lines = document.getElementById('manual-input').value.trim().split('\n').map(s => s.trim()).filter(Boolean);
+    skus = lines.map(l => {
+      const sep = l.indexOf('|');
+      return sep > -1 ? { name: l.slice(0, sep).trim(), desc: l.slice(sep + 1).trim() } : { name: l, desc: '' };
+    });
+  }
+  return skus.filter(s => s.name);
+}
+
+function previewSkus() {
+  allSkus = getSkus();
+  const bar = document.getElementById('preview-bar');
+  if (!allSkus.length) { bar.style.display = 'none'; return; }
+  const preview = allSkus.slice(0, 4).map(s => s.name).join(', ') + (allSkus.length > 4 ? ` ... +${allSkus.length - 4} dalších` : '');
+  bar.style.display = 'block';
+  bar.innerHTML = `Načteno <strong>${allSkus.length} SKU</strong>: ${preview}`;
+  const bs = parseInt(document.getElementById('batch-size').value);
+  document.getElementById('gen-info').textContent = `~${Math.ceil(allSkus.length / bs)} API volání`;
+}
+
+function chunkArray(arr, size) {
+  const chunks = [];
+  for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
+  return chunks;
+}
+
+function showError(msg) {
+  const b = document.getElementById('err-box');
+  b.textContent = msg;
+  b.style.display = 'block';
+}
+
+function hideError() {
+  document.getElementById('err-box').style.display = 'none';
+}
+
+async function processChunk(chunk, chunkIndex, category, apiKey) {
+  const categoryHint = category ? `\nProduct category context: ${category}` : '';
+  const productList = chunk.map((s, i) => {
+    const base = `SKU ${chunkIndex * chunk.length + i + 1}:\nName: ${s.name}`;
+    return (s.desc && s.desc.trim()) ? `${base}\nDescription: ${s.desc}` : base;
+  }).join('\n\n');
+
+  const prompt = `You are an expert Amazon listing copywriter for US/UK marketplaces.${categoryHint}
+
+For each product (originally in Czech), create:
+1. Amazon product title: keyword-rich, 80-150 characters, follow Amazon title format (Brand + Product type + Key feature + Size/Variant if relevant). No promotional phrases like "best" or "amazing".
+2. Exactly 5 bullet points: each starts with a short CAPS KEYWORD (1-3 words), followed by a colon and a concise benefit-focused description. Each bullet must be 150-200 characters total (including the keyword). Stay within Amazon's guidelines.
+
+Important: Some products may have no description — only a name. In that case, use your expert knowledge of that product type to infer realistic features and benefits. If a description IS provided, use it as the primary source.
+
+Products:
+${productList}
+
+Respond ONLY with valid JSON array, no markdown, no preamble, no explanation:
+[{"sku":1,"original":"czech name","title":"Amazon title","bullets":["KEYWORD: text","KEYWORD: text","KEYWORD: text","KEYWORD: text","KEYWORD: text"]}]`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8192,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  const raw = data.content.map(i => i.text || '').join('');
+  const clean = raw.replace(/```json|```/g, '').trim();
+  try {
+    return JSON.parse(clean);
+  } catch(e) {
+    // JSON truncated — try to salvage complete objects
+    const salvaged = [];
+    const objRegex = /\{[^{}]*"sku"[^{}]*"title"[^{}]*"bullets"\s*:\s*\[[^\]]+\][^{}]*\}/gs;
+    let match;
+    while ((match = objRegex.exec(clean)) !== null) {
+      try { salvaged.push(JSON.parse(match[0])); } catch(_) {}
+    }
+    if (salvaged.length > 0) return salvaged;
+    throw new Error('JSON parse error — zkus menší velikost dávky');
+  }
+}
+
+async function startGenerate() {
+  const apiKey = document.getElementById('api-key').value.trim();
+  if (!apiKey) { showError('Zadej API klíč.'); return; }
+  allSkus = getSkus();
+  if (!allSkus.length) { showError('Nejprve vlož SKU data.'); return; }
+  if (isRunning) return;
+  hideError();
+  isRunning = true;
+  results = new Array(allSkus.length).fill(null);
+  document.getElementById('gen-btn').disabled = true;
+  const category = document.getElementById('category').value.trim();
+  const batchSize = parseInt(document.getElementById('batch-size').value);
+  const chunks = chunkArray(allSkus, batchSize);
+  document.getElementById('progress-wrap').style.display = 'block';
+  document.getElementById('results-card').style.display = 'block';
+  renderTable();
+
+  let done = 0;
+  for (let ci = 0; ci < chunks.length; ci++) {
+    const chunk = chunks[ci];
+    const startIdx = ci * batchSize;
+    updateProgress(done, allSkus.length, `Dávka ${ci + 1} / ${chunks.length}...`);
+    setChunkStatus(startIdx, chunk.length, 'proc');
+    try {
+      const chunkResults = await processChunk(chunk, ci, category, apiKey);
+      chunkResults.forEach((item, j) => { results[startIdx + j] = item; });
+      done += chunk.length;
+    } catch (e) {
+      for (let j = 0; j < chunk.length; j++) results[startIdx + j] = { error: true, errorMsg: e.message, original: chunk[j].name };
+      done += chunk.length;
+      showError(`Chyba v dávce ${ci + 1}: ${e.message}`);
+    }
+    updateProgress(done, allSkus.length, done < allSkus.length ? `Dávka ${ci + 2} / ${chunks.length}...` : 'Hotovo!');
+    renderTable();
+  }
+  isRunning = false;
+  document.getElementById('gen-btn').disabled = false;
+}
+
+function updateProgress(done, total, label) {
+  const pct = Math.round(done / total * 100);
+  document.getElementById('prog-label').textContent = label;
+  document.getElementById('prog-pct').textContent = pct + ' %';
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+function setChunkStatus(startIdx, len, status) {
+  for (let j = 0; j < len; j++) {
+    const el = document.getElementById('st-' + (startIdx + j));
+    if (el) {
+      const labels = { proc: 'generuji...', ok: 'ok', err: 'chyba', wait: 'čeká' };
+      const classes = { proc: 'b-proc', ok: 'b-ok', err: 'b-err', wait: 'b-wait' };
+      el.className = 'badge ' + (classes[status] || 'b-wait');
+      el.textContent = labels[status] || status;
+    }
+  }
+}
+
+function renderTable() {
+  const tbody = document.getElementById('result-body');
+  tbody.innerHTML = allSkus.map((sku, i) => {
+    const r = results[i];
+    let statusHtml, titleHtml, bulletsHtml;
+    if (!r) {
+      statusHtml = `<span class="badge b-wait" id="st-${i}">čeká</span>`;
+      titleHtml = '<span style="color:#d1d5db">—</span>';
+      bulletsHtml = '';
+    } else if (r.error) {
+      statusHtml = `<span class="badge b-err" id="st-${i}">chyba</span>`;
+      titleHtml = `<span style="color:#dc2626;font-size:12px;">${r.errorMsg || 'Chyba'}</span>`;
+      bulletsHtml = '';
+    } else {
+      statusHtml = `<span class="badge b-ok" id="st-${i}">ok</span>`;
+      titleHtml = r.title || '';
+      bulletsHtml = (r.bullets || []).map(b => {
+        const sep = b.indexOf(':');
+        const kw = sep > -1 ? b.slice(0, sep) : b;
+        const rest = sep > -1 ? b.slice(sep + 1).trim() : '';
+        return `<div class="bp"><span class="kw">${kw}:</span> ${rest}</div>`;
+      }).join('');
+    }
+    return `<tr>
+      <td style="color:#9ca3af;font-size:12px;white-space:nowrap;">${i + 1}</td>
+      <td class="col-orig">${escHtml(sku.name)}</td>
+      <td style="white-space:nowrap;">${statusHtml}</td>
+      <td class="col-title">${titleHtml}</td>
+      <td class="col-bullets">${bulletsHtml}</td>
+    </tr>`;
+  }).join('');
+
+  const doneCount = results.filter(r => r && !r.error).length;
+  const exportRow = document.getElementById('export-row');
+  if (doneCount > 0) {
+    exportRow.style.display = 'flex';
+    document.getElementById('export-info').textContent = `${doneCount} / ${allSkus.length} SKU hotovo`;
+  }
+}
+
+function escHtml(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function exportCSV() {
+  const header = ['Cislo', 'Puvodni nazev CZ', 'Amazon nazev EN', 'Bullet 1', 'Bullet 2', 'Bullet 3', 'Bullet 4', 'Bullet 5'];
+  const rows = results.map((r, i) => {
+    if (!r || r.error) return [i + 1, allSkus[i].name, r ? 'CHYBA' : '', '', '', '', '', ''];
+    return [i + 1, allSkus[i].name, r.title, ...(r.bullets || ['', '', '', '', ''])];
+  });
+  const csv = [header, ...rows].map(r => r.map(c => '"' + String(c || '').replace(/"/g, '""') + '"').join(',')).join('\n');
+  downloadFile(csv, 'amazon_listings.csv', 'text/csv;charset=utf-8;');
+}
+
+function exportTSV() {
+  const header = ['Cislo', 'Puvodni nazev CZ', 'Amazon nazev EN', 'Bullet 1', 'Bullet 2', 'Bullet 3', 'Bullet 4', 'Bullet 5'];
+  const rows = results.map((r, i) => {
+    if (!r || r.error) return [i + 1, allSkus[i].name, r ? 'CHYBA' : '', '', '', '', '', ''];
+    return [i + 1, allSkus[i].name, r.title, ...(r.bullets || ['', '', '', '', ''])];
+  });
+  const tsv = [header, ...rows].map(r => r.map(c => String(c || '').replace(/\t/g, ' ').replace(/\n/g, ' ')).join('\t')).join('\n');
+  downloadFile(tsv, 'amazon_listings.tsv', 'text/tab-separated-values;charset=utf-8;');
+}
+
+function downloadFile(content, filename, mime) {
+  const blob = new Blob(['\uFEFF' + content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+
+
+</body></html>
